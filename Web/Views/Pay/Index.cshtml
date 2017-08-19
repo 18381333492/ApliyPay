@@ -1,0 +1,39 @@
+﻿
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>H5支付测试</title>
+</head>
+<body>
+    <div style="margin:auto;text-align:center;margin-top:100px;">
+        <label style="color:red">
+            支付金额0.01元
+        </label><br />
+
+        <input id="Pay" type="button" value="发起支付" />
+
+    </div>
+</body>
+</html>
+<script src="~/Scripts/jquery-1.10.2.js"></script>
+<script type="text/javascript">
+    $("#Pay").on("click", function () {
+        $.ajax({
+            url: '/Pay/BookOrder',
+            data: null,
+            type: 'POST',
+            dataType: 'json',
+            success: function (r) {
+                //alert(r.url);
+                debugger
+                location.href = r.url;
+            }
+        })
+    });
+</script>
