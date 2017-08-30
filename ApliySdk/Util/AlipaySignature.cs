@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Security.Cryptography;
 using System.IO;
+using System.Web;
 
 namespace Aop.Api.Util
 {
@@ -29,7 +30,6 @@ namespace Aop.Api.Util
                 }
             }
             string content = query.ToString().Substring(0, query.Length - 1);
-
             return content;
         }
 

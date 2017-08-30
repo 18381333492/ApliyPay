@@ -19,20 +19,19 @@
         <input id="Pay" type="button" value="发起支付" />
 
     </div>
+    <div style="display:none" id="form"></div>
 </body>
 </html>
 <script src="~/Scripts/jquery-1.10.2.js"></script>
 <script type="text/javascript">
     $("#Pay").on("click", function () {
         $.ajax({
-            url: '/Pay/BookOrder',
+            url: '/Pay/doPost',
             data: null,
             type: 'POST',
             dataType: 'json',
             success: function (r) {
-                //alert(r.url);
-                debugger
-                location.href = r.url;
+                $('#form').html(r.form);
             }
         })
     });

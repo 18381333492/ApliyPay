@@ -12,6 +12,9 @@ using Aop;
 using Aop.Api;
 using Aop.Api.Request;
 using Aop.Api.Response;
+using Aop.Api.Domain;
+using Aop.Api.Util;
+using Aop.Api.Parser;
 
 namespace Web.Controllers
 {
@@ -119,39 +122,172 @@ namespace Web.Controllers
         }
 
 
-        private string merchant_private_key = "MIICXAIBAAKBgQCszxwBKjCHOHKFBQcPu+hcs5yv6w5QggiUJ6rdXI38VV5B9yuwx/lDYMLirVKGtESv+pPk813n0bGMez7Vdm2e34QVyR/9RNea4Aklv2PSyv61jPewquwt2EGQ2Mk+853zGjmLb5uEL8Z8y716JrMy1HxFteAEqCA2A7HLyJdaWwIDAQABAoGADXP6LCUKrhw43h4sFI9+YWkiM5fK/32ACXilFqKT8yb6NYx2fEa1IwevZFI18IKsLj8FsHc5wkhS2CroE1oq4mihfGuAPNCvTAV4QD313mkIP5QIZsMPaZX1oL9YLkhkhNyKI6C8Lffys5wOCyX1GqM753D3cHPB6n269zY0dyECQQDbIlqunbVDsx632bL1HzvM6IL6I+twjRKz82W1tL9E5REL4VzPudAVL3T9Y/oKMi3IOcE4HqwtIzE8PpOQXPE5AkEAyeGgwvfg/weMRnptKOUivSAaEscvurbILnr9oOA70LOaDMn5Sxfb1lEBpYX/KG7tJZ81q6wzSjLLmIMg4QmsMwJAdrvYksCVFMebH1bv5m00A8UAIvUPfv6RYbvCIoB7GqNbZyqHFW7C1pfONfXT525k7BaPIQ9Nj2+AH/pwDkqt0QJADiIJixynV7NDkruHYNGJuQvCR4ZCRSP+p6JclyKbjWTFaBfLqAInlb1eDCRxVHdPis62hyoq/QrJTggACUEQGQJBANfXCgop3ADabZx9f+fETwjiDQVKXe73KbSM4GrNNApbtjA+p1iP9RwoRTNvvhW2Lm9Fjm9LOAM2dMQ4XiekFfk=";
+        private string merchant_private_key = "MIIEowIBAAKCAQEAyar5QMTDtAarKX9tcx0IluaSWezSc7GHqvcV8Yv+sEpFZCQZUbHsN7ssJXJXUFhsgCqvPTLDlmO0ns4PdNFSwMT2Q1JAT1dXSXEVvH/OorRA73L2oFEsrTKACN1xvrlsnF4OmH/z2/zCLjyQpAuvxXrfF6tU9uJyDB9iCCOuFJBgmD+N1ALosto6aALRKlMmF3ucL/XUVPjQY9bxqcDzGGkZnZxUeHLLF+9yP6JG814w+moy2PbSMvo+Vm4adDVi+aLVjbD3HOPhblxC4NXjc9MWxCThsCmRUDmkSVTcJNR8Q+DefR7604fzq8IoXLniDm0oO0Yi3qQnUd20PuMK8QIDAQABAoIBAHfYnoXqKS98Yw2nR8EIOQmMft7oCW1tzGVCr4y7mKDlknVfqphNN0creaHLYK5Dzj8gnsGswGVIXZeed7sBhr8+jecWI1fDXQEtLjC2d3Nj0c87L+u4Mee/wi0ChM1GXpBSqTPhnmdWv4NAxOhodY3TZm8nh7esfQBNSjHyGkrnMA3h9PtTEJd92KifPUYuvzHD2KOqzhHJboZ8Ih/lRh5uWCEp7366Mc3q2RafpLVxRjchPfGeU7PPidviFrnhN0BjaAsawPzPCpfn04zvS96dNbuJKLOZ0sMOHhxNLphWsk68nVUNytbmS8lpr2cKMPdg/QoiwGvhrNNOyxFTxAECgYEA6JTNlJBqfGmQkMtto09VJOhhO0r67nMd+fKdxBP+F5WVzNqoTBycH0HoIz6XYIsEubyAVMRNqZvQd9uvl7m3pgnGtEIj5TKB9WkpZtMe/k87APCeq+rZLjvt1bax5/Y9BQZwB3O0x2jAtVHZc2sO44ybQnKNAzTGvBvSbiQ8dEECgYEA3flSmfq/A4qTJ5gMSi60zFpn6v2UfDkv/UGwfOAWH+RrNKDq6wg2PVsRrkpOsS9oSkyiVtkWa4XVx9m34zo4APvOKoUyqfI3petTDtGV1zBhBvkOl6bCVAVxHUg6VN4wObaq86UR8FdfsauikTHxFscPgP+4mcr+DJyymDUEKrECgYEAqVgfT7rPLgMXFbZo/+21iwgAM9HmX1RGUUWMBcagzb9GsT/MJo72RfQQ+AiM4+iU6kAMGKxN997RrVOxyIGa7DRWD83QoQNjiLKnSI0UFgrOZWLNxVNcCsPr6h3573FlAJGtZF+lE0R8fAk6kUU0NA6exYTuk5UL1s9TKosL0YECgYB52cvGSydgQknViln0vv7wzxAMp3dDWgFF/TFs23ZJu5I+KbfLnY5oz/08t/3KtkOBxd+33SO5kpZwRsvzKJplr9TU8pmFQTnbEvtdPyAKKLyan02rYhd7GCGn+WZMAExo4iWl6g+W59/YIGf1XH0EC/Iu1jH3+r7LHZnMhA3tgQKBgAENUaxBNuWdPY/LMac1M6kEkxx377Vi41EBZOHpNHxiusN7q5CeW6/EvxodwMvBJaJXfSNSnIBth44PH06SmP6AGSp4cong7xpR3v3BGf3MI06Y4oNcgXv1gXg2nSgMH2y1g8PkE9lhVrdwKNGBusMV0yaDQCXfvv0Zaa3d1MWu";
 
-        private string alipay_public_key = "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCszxwBKjCHOHKFBQcPu+hcs5yv6w5QggiUJ6rdXI38VV5B9yuwx/lDYMLirVKGtESv+pPk813n0bGMez7Vdm2e34QVyR/9RNea4Aklv2PSyv61jPewquwt2EGQ2Mk+853zGjmLb5uEL8Z8y716JrMy1HxFteAEqCA2A7HLyJdaWwIDAQAB";
+        private string alipay_public_key = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAl4cdAY6ll1ZJyGLNUr/Yh+W2lZnPCzsGYzx9Qavg6PTrFK8BSZB6Pm9wNrhQcgMhOaQTqV8xMOPmtJMEEdcy3zKul7eVfJRCuQBwQ8i+DP2IMxa05+UjvBSyP5DMip5B/HMpqxl7Xs7cbqzH9G4/lrWo6nHvWhy7aO7ICu/+oxPPFadUj4vI0ZqA39falmlBFNk7lQDWXPxTt/gHkyPsL9zQkaYTMd6hPR4zsFJLqvm+Zl21fXWn0qyeOdlwRGBud8bdfif1jCOzoDlyZvWHw2eYzEgV99udBq6o7Iv+Z1f2upXYitLqv5ISOuicu9te/a7ePZOkLIbD7YCaSmQbBQIDAQAB";
         /// <summary>
         /// 支付宝支付
         /// </summary>
         /// <returns></returns>
-        public void doPost()
+        public ActionResult doPost()
         {
-            IAopClient client = new DefaultAopClient("http://openapi.alipaydev.com/gateway.do",
-                "2017081108144704",//支付宝分配给开发者的应用ID
+            IAopClient client = new DefaultAopClient("https://openapi.alipay.com/gateway.do",
+                "2017081108144704",    //"2017081108144704",//支付宝分配给开发者的应用ID
                 merchant_private_key,
                 "json",//仅支持JSON
                 "1.0", //调用的接口版本，固定为：1.0
                 "RSA2",//商户生成签名字符串所使用的签名算法类型，目前支持RSA2和RSA，推荐使用RSA2
                 alipay_public_key,
-                "GBK",
+                "utf-8",
                 false);
             AlipayTradeWapPayRequest request = new AlipayTradeWapPayRequest();
-            request.SetNotifyUrl(string.Empty);//设置异步通知地址
-            request.SetReturnUrl(string.Empty);//设置同步通知地址
-            JObject jobParams = new JObject();
-            jobParams.Add(new JProperty("body", "测试订单"));//对一笔交易的具体描述信息
-            jobParams.Add(new JProperty("subject", "测试标题"));//商品的标题/交易标题/订单标题/订单关键字等。
-            jobParams.Add(new JProperty("out_trade_no", DateTime.Now.ToString("yyyyMMddHHmmssfff")));//商户网站唯一订单号
-            jobParams.Add(new JProperty("timeout_express", "2h"));//订单失效时间
-            jobParams.Add(new JProperty("total_amount", "0.01"));//订单总金额，单位为元，精确到小数点后两位，取值范围[0.01,100000000]
-            jobParams.Add(new JProperty("product_code", "QUICK_WAP_WAY"));//销售产品码，商家和支付宝签约的产品码。该产品请填写固定值：QUICK_WAP_WAY
-            //jobParams.Add(new JProperty("quit_url", "QUICK_WAP_WAY"));
-            request.BizContent = jobParams.ToString();
-            AlipayTradeWapPayResponse response = client.pageExecute(request);
-            string form = response.Body;
-            Response.Write(form);
+
+            AlipayTradeWapPayModel model = new AlipayTradeWapPayModel();
+           // model.Body= "测试订单";////对一笔交易的具体描述信息
+            model.OutTradeNo= DateTime.Now.ToString("yyyyMMddHHmmssfff");
+            model.ProductCode = "QUICK_WAP_WAY";
+            model.Subject = "测试订单";//商品的标题/交易标题/订单标题/订单关键字等。
+            model.TimeoutExpress = "2h";////订单失效时间
+            model.TotalAmount = "0.01";//订单总金额，单位为元，精确到小数点后两位，取值范围[0.01,100000000]
+            request.SetBizModel(model);
+            request.SetNotifyUrl("http://t17m267950.imwork.net/AlipayNotify.ashx");//设置异步通知地址
+            request.SetReturnUrl("http://t17m267950.imwork.net/Pay/Success");//设置同步通知地址
+            string form = client.pageExecute(request).Body;
+           // Response.Write(form);
+            return Json(new { form = form });
+        }
+
+
+        /// <summary>
+        /// 支付宝异步通知
+        /// </summary>
+        public void Notify()
+        {
+            byte[] bNetStream =Request.BinaryRead(Request.ContentLength);
+            string RequestParams = System.Text.Encoding.UTF8.GetString(bNetStream);
+            RequestParams = HttpUtility.UrlDecode(RequestParams);
+            var DicData = new AopDictionary();
+
+            foreach (string key in Request.Form.Keys)
+            {
+                DicData.Add(key, Request.Form[key]);
+            }
+
+            // var Apikey = @"MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAl4cdAY6ll1ZJyGLNUr/Yh+W2lZnPCzsGYzx9Qavg6PTrFK8BSZB6Pm9wNrhQcgMhOaQTqV8xMOPmtJMEEdcy3zKul7eVfJRCuQBwQ8i+DP2IMxa05+UjvBSyP5DMip5B/HMpqxl7Xs7cbqzH9G4/lrWo6nHvWhy7aO7ICu/+oxPPFadUj4vI0ZqA39falmlBFNk7lQDWXPxTt/gHkyPsL9zQkaYTMd6hPR4zsFJLqvm+Zl21fXWn0qyeOdlwRGBud8bdfif1jCOzoDlyZvWHw2eYzEgV99udBq6o7Iv+Z1f2upXYitLqv5ISOuicu9te/a7ePZOkLIbD7YCaSmQbBQIDAQAB";
+            //foreach(string key in Request.QueryString.Keys)
+            //{
+            //    DicData.Add(key, Request.QueryString[key]);
+            //}
+
+            //验证签名
+            if (AlipaySignature.RSACheckV1(DicData, alipay_public_key, DicData["charset"], DicData["sign_type"], false))
+            {
+                if (DicData["app_id"] == "2017081108144704")
+                {
+                    if (DicData["trade_status"] == "TRADE_SUCCESS")
+                    {//支付成功
+                        
+                    }
+                    Response.Clear();
+                    Response.Write("success");
+                }
+                else
+                {//通知异常(假通知)
+                   
+                }
+            }
+        }
+
+
+
+        /// <summary>
+        /// 支付宝支付状态查询
+        /// </summary>
+        public void PayQuery()
+        {
+            string out_trade_no = "20170821141701640";
+            IAopClient client = new DefaultAopClient("https://openapi.alipay.com/gateway.do",
+             "2017081108144704",
+            merchant_private_key,
+                "json", 
+                "1.0",
+                "RSA2",
+               alipay_public_key,
+               "utf-8",
+                false);
+            AlipayTradeQueryRequest request = new AlipayTradeQueryRequest();
+            JObject job = new JObject();
+            job.Add(new JProperty("out_trade_no", out_trade_no));
+            request.BizContent = job.ToString();
+            AlipayTradeQueryResponse response = client.Execute(request);
+            JObject resultJosn =JObject.Parse(response.Body);
+            if (resultJosn["trade_status"].ToString() == "TRADE_SUCCESS")
+            {//支付成功
+
+            }
+            else
+            {
+                //if (resultJosn["trade_status"].ToString() == "WAIT_BUYER_PAY")//交易创建，等待买家付款
+                //if (resultJosn["trade_status"].ToString() == "TRADE_CLOSED")//未付款交易超时关闭，或支付完成后全额退款
+                //if (resultJosn["trade_status"].ToString() == "TRADE_FINISHED")//交易结束，不可退款
+
+            }
+        }
+
+
+
+        /// <summary>
+        /// 支付宝申请退款
+        /// </summary>
+        public void PayRefund()
+        {
+            IAopClient client = new DefaultAopClient("https://openapi.alipay.com/gateway.do",
+                "2017081108144704",
+              merchant_private_key, 
+                "json", 
+                "1.0",
+                "RSA2",
+                alipay_public_key,
+                "utf-8",
+                false);
+            AlipayTradeRefundRequest request = new AlipayTradeRefundRequest();
+
+            AlipayTradeRefundModel model = new AlipayTradeRefundModel();
+
+            model.OutTradeNo = "20170821141701640";
+            model.RefundAmount = "0.01";
+            model.RefundReason = "正常退款";
+
+            request.SetBizModel(model);
+
+            //request.BizContent = "{" +
+            //"\"out_trade_no\":\"20150320010101001\"," +
+            //"\"trade_no\":\"2014112611001004680073956707\"," +
+            //"\"refund_amount\":200.12," +
+            //"\"refund_reason\":\"正常退款\"," +
+            //"\"out_request_no\":\"HZ01RF001\"," +
+            //"\"operator_id\":\"OP001\"," +
+            //"\"store_id\":\"NJ_S_001\"," +
+            //"\"terminal_id\":\"NJ_T_001\"" +
+            //"  }";
+            AlipayTradeRefundResponse response = client.Execute(request);
+            string result = response.Body;
+
+            var paramsData = JObject.Parse(result);
+
+
+                //AopJsonParser<AopResponse>
+        }
+
+
+
+        /// <summary>
+        /// 同步回调地址
+        /// </summary>
+        /// <returns></returns>
+        public ActionResult Success()
+        {
+            return View();
         }
     }
 }
